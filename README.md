@@ -9,7 +9,7 @@ Basically this is a personyl exercize of mine to get familiar with Verilog HDL.
 If you interested in a more practical approach on operating a 434MHz switch, see
 for example [this article] (http://gpio.kaltpost.de/?p=2163). 
  
-For some theorie on how the protocol to operate the switches work, you could 
+For some theory on the protocol to operate the switches, you could 
 have a look at [this article] (http://gpio.kaltpost.de/?paged=2), or read
 the comment in `rcswitch.v`.
 
