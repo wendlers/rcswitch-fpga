@@ -5,7 +5,7 @@ sw@kaltpost.de
 
 Simple verilog module to operate a 434MHz RC switch from an FPGA. 
 
-Basically this is a personyl exercize of mine to get familiar with Verilog HDL. 
+Basically this is a personal exercise of mine to get familiar with Verilog HDL. 
 If you interested in a more practical approach on operating a 434MHz switch, see
 for example [this article] (http://gpio.kaltpost.de/?p=2163). 
  
