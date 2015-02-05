@@ -1,0 +1,15 @@
+verilog_simulation = Builder(
+    action='iverilog -o $TARGET $VDLINCLUDES $SOURCES',
+    suffix='.vvp', src_suffix='.v')
+
+env = Environment(BUILDERS = {'GenSim' : verilog_simulation})
+
+env['VDLINCLUDES'] = "-I ./include"
+
+rcswitch_sources = [
+	'clockdiv.v',
+	'rcswitch.v',
+	'rcswitch_tb.v'
+]
+
+env.GenSim('rcswitch', rcswitch_sources)
