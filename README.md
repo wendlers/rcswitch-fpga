@@ -52,7 +52,7 @@ Wiring
 	---------------------------
 	3.3V			Vcc
 	GND				GND
-	Out (P1)			DATA
+	Out (P1)		DATA
 
 
 	FPGA			Buttons
