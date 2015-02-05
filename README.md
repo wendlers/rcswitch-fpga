@@ -88,7 +88,7 @@ This will produce `rcswitch.vcd` which could be loaded into GTKWave:
 
 	gtkwave rcswitch.vcd
 
-![Simulation result in GTKWave] (./doc/gtkwace.png)
+![Simulation result in GTKWave] (./doc/gtkwave.png)
 
 
 Running on the MachXO2
