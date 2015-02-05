@@ -33,7 +33,7 @@ Requirements
 
 For simulation:
 
-* [Icaruss] (http://iverilog.icarus.com) (on Ubuntu like Linux: `apt-get install iverilog`)
+* [Icarus] (http://iverilog.icarus.com) (on Ubuntu like Linux: `apt-get install iverilog`)
 * [GTKiWave] (http://gtkwave.sourceforge.net) (on Ubuntu like Linux: `apt-get install gtkwave`)
 * [SCons] (http://www.scons.org) to build the simulation (on Ubuntu like Linux: `apt-get install scons`)
 
