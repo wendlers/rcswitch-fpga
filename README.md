@@ -40,7 +40,7 @@ For simulation:
 For the real thing (FPGA), I used the following setup:
 
 * [Lattice MachXO2 breakout board] (http://www.latticesemi.com/en/Products/DevelopmentBoardsAndKits/MachXO2BreakoutBoard.aspx) (very afordable)
-* [Lattice Diamond Software] (http://www.latticesemi.com/Products/DesignSoftwareAndIP/FPGAandLDS/LatticeDiamond.aspx), free license available (Installing this on Ubuntu is pain in the ass. But if you really like to do this, let me know and I could prove instructions)
+* [Lattice Diamond Software] (http://www.latticesemi.com/Products/DesignSoftwareAndIP/FPGAandLDS/LatticeDiamond.aspx), free license available (Installing this on Ubuntu is pain in the ass. But if you really like to do this, let me know and I could provide instructions)
 * [RC switches] (http://www.pollin.de/shop/dt/MzMzOTQ0OTk-/Haustechnik/Funkschaltsysteme/Funksteckdosen_Set_mit_3_Steckdosen.html)
 * [434MHz transmitter] (http://www.watterott.com/en/RF-Link-Transmitter-434MHz)
 
