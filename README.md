@@ -1,9 +1,10 @@
-RC Switch Send - Verilog Module to Operate 434MHz RC Switches
-==============================================================
+RC Switch Send/Receive - Verilog Module to Operate 434MHz RC Switches
+=====================================================================
 05.02.2015 Stefan Wendler
 sw@kaltpost.de
 
-Simple verilog module to operate a 434MHz RC switch from an FPGA. 
+Some simple verilog module to send swtich commands to a 434MHz receiver or to receive
+commands from a transmitter. 
 
 Basically this is a personal exercise of mine to get familiar with Verilog HDL. 
 If you interested in a more practical approach on operating a 434MHz switch, see
@@ -24,8 +25,7 @@ The top-level directory structure of the project looks something like this:
 * `README.md`		this README
 * `rcswitch.v`		Verilog of the mail logic to drive the switch
 * `clockdiv.v`		Verilog for simple clock devider to send the bits at the right speed
-* `top.v`			Top level module used on real FPGA
-* `rcswitch_tb.v`	Testbench for simulation	
+* `examples`		Example usage of the `rcswitch` module
 
 
 Requirements
@@ -48,6 +48,8 @@ For the real thing (FPGA), I used the following setup:
 Wiring
 ------
 
+For sending commands (transmitter):
+
 	FPGA			Transmitter
 	---------------------------
 	3.3V			Vcc
@@ -65,10 +67,19 @@ Wiring
 	Note: the buttons are low active, they are pulled up in the verilog.
 
 
+For receiving commands (receiver):
+
+	FPGA			Receiver	
+	---------------------------
+	3.3V			Vcc
+	GND				GND
+	In (P5)			DATA
+
+
 Verilog
 -------
 
-For more details please see the sources. The netlist looks like so:
+For more details please see the sources. The netlist for the receiver looks like so:
 
 ![Netlist] (./doc/netlist.png)
 
@@ -82,11 +93,15 @@ Build the simulation in the project top-dir with:
 
 Run it with:
 
-	./rcswitch.vvp
+	./rcswitch_send.vvp
 
-This will produce `rcswitch.vcd` which could be loaded into GTKWave:
+or
+	./rcswitch_receive.vvp
 
-	gtkwave rcswitch.vcd
+
+This will produce `rcswitch_send.vcd` or `rcswitch_receive.v` which could be loaded into GTKWave:
+
+	gtkwave rcswitch_send.vcd
 
 ![Simulation result in GTKWave] (./doc/gtkwave.png)
 
@@ -94,5 +109,7 @@ This will produce `rcswitch.vcd` which could be loaded into GTKWave:
 Running on the MachXO2
 ----------------------
 
-Open the `rcswitch.ldf` in Diamond. On the left side swich to "Process" tab, richt klick "JEDEC File/Rerun All". 
-Then flash it to the FPGA by starting the programmer (Tools/Programmer).
+Open one of the `rcswitch.ldf` from `examples/send`or `examples/receive` in Diamond. On the left side swich to 
+"Process" tab, richt klick "JEDEC File/Rerun All".  Then flash it to the FPGA by starting the 
+programmer (Tools/Programmer).
+
