@@ -1,0 +1,4 @@
+.sconsign.dblite
+*.vcd
+*.vvp
+impl1
