@@ -6,10 +6,24 @@ env = Environment(BUILDERS = {'GenSim' : verilog_simulation})
 
 env['VDLINCLUDES'] = "-I ./include"
 
-rcswitch_sources = [
+rcswitch_send_sources = [
 	'clockdiv.v',
 	'rcswitch.v',
-	'rcswitch_tb.v'
+	'rcswitch_send_tb.v'
 ]
 
-env.GenSim('rcswitch', rcswitch_sources)
+rcswitch_receive_sources = [
+	'clockdiv.v',
+	'rcswitch.v',
+	'rcswitch_receive_tb.v'
+]
+
+rcswitch_pt_sources = [
+	'rcswitch.v',
+	'rcswitch_pt_tb.v'
+]
+
+
+env.GenSim('rcswitch_send', rcswitch_send_sources)
+env.GenSim('rcswitch_receive', rcswitch_receive_sources)
+env.GenSim('rcswitch_pt', rcswitch_pt_sources)

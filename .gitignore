@@ -2,3 +2,9 @@
 *.vcd
 *.vvp
 impl1
+rcswitch1.sty
+rcswitch.ccl
+rcswitch_tcl.html
+rcswitch_tcr.dir
+reportview.xml
+.*.ini

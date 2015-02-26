@@ -27,9 +27,9 @@
  * 
  * I use this with iverilog and gtkwave:
  * 
- * 	iverilog -o rcswitch.vvp clockdiv.v rcswitch.v rcswitch_tb.v 	
- * 	./rcswitch.vvp
- * 	gtkwace rcswitch.vcd
+ * 	iverilog -o rcswitch.vvp clockdiv.v rcswitch.v rcswitch_send_tb.v 	
+ * 	./rcswitch_send.vvp
+ * 	gtkwace rcswitch_send.vcd
  */
 module rcswitch_test;
 
@@ -69,8 +69,8 @@ module rcswitch_test;
 
 	initial
 	begin
-    	$dumpfile("rcswitch.vcd");
-		$dumpvars(0, rcswitch_test);
+    	$dumpfile("rcswitch_send.vcd");
+		$dumpvars(0, rcswitch_send_inst);
 	end
 
 endmodule

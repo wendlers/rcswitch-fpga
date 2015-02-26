@@ -119,11 +119,13 @@ module rcswitch_send(
 	reg r_out;
 	reg r_ready;
 	reg [7:0] pos;
+	reg [127:0] msg;
 
 	initial begin
 		r_ready = 1;
 		r_out 	= 0;
 		pos 	= 0;
+		msg     = 0;
 	end
 
 	always @(posedge clk) begin
@@ -132,19 +134,12 @@ module rcswitch_send(
 		if(send && pos == 0) begin
 			pos = 128;
 			r_ready = 0;
+			msg[127:0] = {addr[39:0], chan[39:0], stat[15:0], sync[31:0]};
 		end
 		// shift out the bits for the message
 		else if(pos > 0) begin
 			pos = pos - 1;
-			
-			if(pos < 128 && pos > 87) 
-				r_out = (addr >> (pos - 88));
-			else if(pos < 88 && pos > 47) 
-				r_out = (chan >> (pos - 48));
-			else if(pos < 48 && pos > 31) 
-				r_out = (stat >> (pos - 32));
-			else
-				r_out = (sync >> pos) & 1'b1;
+			r_out = msg >> pos;
 				
 			// message is done - prepare for repeat
 			if(pos == 0) begin
@@ -153,9 +148,176 @@ module rcswitch_send(
 				pos 	= 0;
 			end
 		end
+		else begin
+			msg = ~msg;
+		end
 	end
 
 	assign ready = r_ready;
 	assign out 	 = r_out;
 
 endmodule 
+
+module tri_state_detect (
+	input clk, 
+	input rst,
+	input in,
+	output [31:0] count_h,
+	output [31:0] count_l,
+	output detected
+);
+
+	reg [31:0] ticks;
+	reg [31:0] t1;
+	reg [31:0] t2;
+
+	reg synced;
+
+	reg [31:0] r_count_h;
+	reg [31:0] r_count_l;
+
+
+	initial begin
+		ticks 		<= 0;
+		t1 			<= 0;
+		t2 			<= 0;
+		synced		<= 0;
+		r_count_h 	<= 0;
+		r_count_l 	<= 0;
+	end
+
+	always @(posedge clk or posedge rst) begin
+		if(rst) begin
+			ticks <= 0;
+		end
+		else begin
+			ticks <= ticks + 1;
+		end
+	end
+
+	always @(negedge in or posedge rst) begin
+		if(rst) begin
+			t2 <= 0;
+		end
+		else begin
+			if(t1 > 0) begin
+				t2 <= ticks;
+			end
+		end
+	end
+
+	always @(posedge in or posedge rst) begin
+		if(rst) begin
+			t1 			<= 0;
+			r_count_h 	<= 0;
+			r_count_l 	<= 0;
+			synced		<= 0;
+		end
+		else begin
+			if(t2 > t1) begin
+				r_count_h = t2 - t1;
+				r_count_l = ticks - t2;
+				synced <= 1;
+			end
+			else begin
+				synced <= 0;
+			end
+			t1 <= ticks;
+		end
+	end
+	
+	assign count_h 	= r_count_h;
+	assign count_l 	= r_count_l;
+	assign detected = (synced & in);
+
+endmodule
+
+module rcswitch_receive(
+	input clk, 
+	input rst,
+	input in,
+	output [39:0] addr,
+	output [39:0] chan,
+	output [15:0] stat,
+	output ready,
+	output [7:0] dbg	
+);
+
+	reg [8:0] count;
+	reg [95:0] msg;
+
+	reg [39:0] r_addr;
+	reg [39:0] r_chan;
+	reg [15:0] r_stat;
+
+	reg r_ready;
+
+	initial begin
+		count	<= 0;
+		msg		<= 0;
+		r_addr	<= 0;
+		r_chan	<= 0;
+		r_stat	<= 0;
+		r_ready	<= 0;
+	end
+
+	wire [31:0] count_h;
+	wire [31:0] count_l;
+	wire detected;
+
+	tri_state_detect tsd_inst (
+		.clk(clk),
+		.rst(rst),
+		.in(in),
+		.count_h(count_h),
+		.count_l(count_l),
+		.detected(detected)
+	);
+
+	always @(posedge detected or posedge rst) begin
+
+		if(rst) begin
+			count 	<= 0;
+			r_addr	<= 0;
+			r_chan	<= 0;
+			r_stat	<= 0;
+			r_ready	<= 0;
+		end
+		else begin
+
+			// detected SYNC
+			if(count_h * 10 < count_l) begin
+				count <= 0;
+				msg <= 0;
+			end 
+			// detected 1000
+			else if(count_h < count_l) begin
+				msg <= (msg << 4) | 96'b1000;
+				count <= count + 1;
+			end 
+			// detected 1110
+			else if(count_l < count_h) begin
+				msg <= (msg << 4) | 96'b1110;
+				count <= count + 1;
+			end
+
+			// message complete?
+			if(count == 24) begin	
+				{r_addr[39:0], r_chan[39:0], r_stat[15:0]} <= msg;
+				r_ready <= 1;
+				count <= 0;
+				msg <= 0;
+			end	
+			else begin
+				r_ready <= 0;
+			end
+		end
+
+	end
+
+	assign ready = r_ready;
+	assign addr  = r_addr;
+	assign chan  = r_chan;
+	assign stat  = r_stat;
+
+endmodule
