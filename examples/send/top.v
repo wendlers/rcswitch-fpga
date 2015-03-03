@@ -107,7 +107,6 @@ module top(
 	
 	reg [39:0] addr;
 	reg [39:0] chan;
-	reg [31:0] sync;
 
 	initial begin
 		leds[7:1] = 7'b0111111;	
@@ -115,7 +114,6 @@ module top(
 		// this is kept constant in this example - only the state is changed		
 		addr  = 40'b10001000_10001000_10001000_10001000_10001000;	// 11111 
 		chan  = 40'b10001000_10001110_10001110_10001110_10001110; 	// 0FFFF = A
-		sync  = 32'b10000000_00000000_00000000_00000000; 			// SYNC
 	end
 	
 	wire clk_rcswitch;
@@ -132,11 +130,11 @@ module top(
 	// the send instance
 	rcswitch_send rcswitch_send_inst1 (
 		.clk(clk_rcswitch),
+		.rst(1'b0),
 		.send(send),
 		.addr(addr),
 		.chan(chan),
 		.stat(stat),
-		.sync(sync),
 		.ready(ready),
 		.out(out)
 	);

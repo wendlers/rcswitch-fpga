@@ -83,7 +83,7 @@
  * 	sync => 10000000_00000000_00000000_00000000
  * 
  *****************************************************************************
- * Also it shold be noted, that a message needs to be sent multible times (2-10). 
+ * Also it should be noted, that a message needs to be sent multible times (2-10). 
  * Otherwise it is very likely that the switch will not work!
  *****************************************************************************
  * 
@@ -91,6 +91,7 @@
  * 		clk			on the positive edge, the next bit is shifted to the radio
  * 					the clock needs to provide 350us per cycle (from rising 
  * 					edge to rising edge)
+ *		rst			reset
  * 		send		if set to 1, the complete message (addr+chan+stat+sync) is send
  * 					over and over again until send is set back to 0
  *		addr		the address in tri-state wave-form
@@ -99,19 +100,17 @@
  * 				 	e.g. 40'b10001000_10001110_10001110_10001110_10001110 = chan A 
  * 		stat		the status in tri-state wave-form
  * 					e.g. 16'b10001000_10001110 = ON 
- * 		sync		the sync bit in tri-state wave-form
- * 					e.g. 32'b10000000_00000000_00000000_00000000
  * outputs:
  * 		ready		1 if module is ready to send, 0 if sending is already in progrss
  * 		out			the bits shifted out to the radio
  */
 module rcswitch_send(
 	input clk, 
+	input rst,
  	input send,
 	input [39:0] addr,
 	input [39:0] chan,
 	input [15:0] stat,
-	input [31:0] sync,
 	output ready,
 	output out 
 	);
@@ -122,34 +121,43 @@ module rcswitch_send(
 	reg [127:0] msg;
 
 	initial begin
-		r_ready = 1;
-		r_out 	= 0;
-		pos 	= 0;
-		msg     = 0;
+		r_ready <= 1;
+		r_out 	<= 0;
+		pos 	<= 0;
+		msg     <= 0;
 	end
 
-	always @(posedge clk) begin
-		
-		// start a new message
-		if(send && pos == 0) begin
-			pos = 128;
-			r_ready = 0;
-			msg[127:0] = {addr[39:0], chan[39:0], stat[15:0], sync[31:0]};
-		end
-		// shift out the bits for the message
-		else if(pos > 0) begin
-			pos = pos - 1;
-			r_out = msg >> pos;
-				
-			// message is done - prepare for repeat
-			if(pos == 0) begin
-				r_ready = 1;
-				r_out 	= 0;
-				pos 	= 0;
-			end
+	always @(posedge clk or posedge rst) begin
+		if(rst) begin
+			r_ready <= 1;
+			r_out 	<= 0;
+			pos 	<= 0;
 		end
 		else begin
-			msg = ~msg;
+			// start a new message
+			if(send && pos == 0) begin
+				pos <= 128;
+				r_ready <= 0;
+				msg[127:0] <= {addr[39:0], chan[39:0], stat[15:0], 32'b10000000_00000000_00000000_00000000};
+			end
+			// shift out the bits for the message
+			else if(pos > 0) begin
+				pos <= pos - 1;
+				r_out <= msg >> pos;
+				
+				// message is done - prepare for repeat
+				if(pos == 0) begin
+					r_ready <= 1;
+					r_out 	<= 0;
+					pos 	<= 0;
+				end
+				else begin
+					r_ready <= 0;
+				end
+			end
+			else begin
+				msg <= ~msg;
+			end
 		end
 	end
 
@@ -158,6 +166,26 @@ module rcswitch_send(
 
 endmodule 
 
+/**
+ * Module to detect tri-state wave forms. 
+ * 
+ * The module will detect a combination of high/low and count the clk cycles for 
+ * each of the two phases:
+ * 
+ *        +---------+         +--
+ * 		__|         |_________|
+ *          count_h   count_l
+ * 
+ * inputs:
+ * 		clk			clock used for the counter of high/low times. the clock should be
+ *					a lot faster then the clock of the wave form
+ *		rst			reset
+ *		in			the input from the radio
+ * outputs:
+ * 		count_h		clk counts for the time the wave-form was high 
+ * 		count_l		clk counts for the time the wave-form was low 
+ * 		detected	1 if tri-state was detected, 0 otherwise 
+ */
 module tri_state_detect (
 	input clk, 
 	input rst,
@@ -232,6 +260,20 @@ module tri_state_detect (
 
 endmodule
 
+/**
+ * Module to receive tri-state signals for RC switches send by a radio.
+ * 
+ * inputs:
+ * 		clk			clock used for the counter of high/low times. the clock should be
+ *					a lot faster then the clock of the wave form
+ *		rst			reset
+ *		in			the input from the radio
+ * outputs:
+ * 		addr		address received (see rcswitch_send)
+ * 		chan		channel received (see rcswitch_send)
+ * 		stat		status received  (see rcswitch_send)
+ * 		ready		1 if complete message was received, 0 otherwise
+ */
 module rcswitch_receive(
 	input clk, 
 	input rst,
@@ -239,8 +281,7 @@ module rcswitch_receive(
 	output [39:0] addr,
 	output [39:0] chan,
 	output [15:0] stat,
-	output ready,
-	output [7:0] dbg	
+	output ready
 );
 
 	reg [8:0] count;

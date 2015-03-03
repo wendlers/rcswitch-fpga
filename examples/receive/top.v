@@ -24,7 +24,7 @@
 
 /**
  * Top module receiving commands from remote control. Each channel (A..D) of 
- * the remote switches a led (0..3). 
+ * the remote switches a LED (0..3). 
  * 
  * inputs:
  * 	clk_12M		12MHz input clock
@@ -74,7 +74,7 @@ module top(
 	// ready indicates a new message was received
 	always @(posedge ready) begin
 		
-		// check if the message matches out addresss
+		// check if the message matches our addresss
 		if(addr == 40'h8888888888) begin
 
 			// see which channel is addressed (A, B, C or D) 

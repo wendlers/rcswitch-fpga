@@ -35,7 +35,6 @@ module rcswitch_test;
 
 	reg [39:0] addr;
 	reg [39:0] chan;
-	reg [31:0] sync;
 	reg [15:0] stat;
 	reg send;
 
@@ -43,7 +42,6 @@ module rcswitch_test;
 		#0   addr = 40'b10001000_10001000_10001000_10001000_10001000;	// 11111 
 		#0   chan = 40'b10001000_10001110_10001110_10001110_10001110; 	// 0FFFF = A
 		#0   stat = 16'b10001110_10001000;								// F0 = ON 
-		#0   sync = 32'b10000000_00000000_00000000_00000000; 			// SYNC
 		#2   send = 1;
 		#100 send = 0;
 		#300 $finish;
@@ -58,11 +56,11 @@ module rcswitch_test;
 
 	rcswitch_send rcswitch_send_inst (
 		.clk(clk),
+		.rst(1'b0),
 		.send(send),
 		.addr(addr),
 		.chan(chan),
 		.stat(stat),
-		.sync(sync),
 		.ready(ready),
 		.out(out)
 	);
